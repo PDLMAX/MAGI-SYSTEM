@@ -36,8 +36,8 @@ A decision-making interface inspired by the **Magi supercomputer system** from *
 
 #如何绑定：
 1. 打开index文档： 找到"===== CONFIGURATION ====="配置项目 
-2. 找到对应  apiEndpoint: '',  // 配置你的豆包 API 端点
-           apiKey: '',       // 配置你的豆包 API Key
+2. 找到对应如：  apiEndpoint: '',  // 配置你的豆包 API 端点   
+              apiKey: '',       // 配置你的豆包 API Key  （个人API key 不轻易对外透露）   
 3. 注意：提供个人的API 需要去大模型网站上自行申请
 
 
