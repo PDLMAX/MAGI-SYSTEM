@@ -24,20 +24,22 @@ A decision-making interface inspired by the **Magi supercomputer system** from *
 
 *人类的命运，将由三种不同的AI思维共同决定。*
 
-<img width="1416" height="817" alt="截屏2026-04-17 19 11 14" src="https://github.com/user-attachments/assets/7d47fc31-5e83-4256-9a98-814012a2d9ea" />
-<img width="1321" height="819" alt="截屏2026-04-18 10 03 44" src="https://github.com/user-attachments/assets/9941f562-1574-4455-bd76-8ff3056cd0ef" />
+<img width="297" height="210" alt="截屏2026-04-17 19 11 14" src="https://github.com/user-attachments/assets/7d47fc31-5e83-4256-9a98-814012a2d9ea" />
+<img width="297" height="210" alt="截屏2026-04-18 10 03 44" src="https://github.com/user-attachments/assets/9941f562-1574-4455-bd76-8ff3056cd0ef" />
 
 #功能：
 1. 三贤者决策模式：文本框中输入你想要的问题-执行，三个大模型同时分析并表决
-   <img width="1440" height="817" alt="截屏2026-04-20 21 10 55" src="https://github.com/user-attachments/assets/ba04bbc3-bc71-4ab8-96cf-90b0034c882f" />
+   <img width="297" height="210" alt="截屏2026-04-20 21 10 55" src="https://github.com/user-attachments/assets/ba04bbc3-bc71-4ab8-96cf-90b0034c882f" />
 
 3. 单模对话模式：可单独与其中一个模型进行对话
-   <img width="1306" height="704" alt="截屏2026-04-18 22 00 41" src="https://github.com/user-attachments/assets/be10ada5-7f9a-4ee8-8bf5-75b531c5926b" />
+   <img width="297" height="210" alt="截屏2026-04-18 22 00 41" src="https://github.com/user-attachments/assets/be10ada5-7f9a-4ee8-8bf5-75b531c5926b" />
 
 #如何绑定：
 1. 打开index文档： 找到"===== CONFIGURATION ====="配置项目 
 2. 找到对应如：  apiEndpoint: '',  // 配置你的豆包 API 端点   
               apiKey: '',       // 配置你的豆包 API Key  （个人API key 不轻易对外透露）   
 3. 注意：提供个人的API 需要去大模型网站上自行申请
+
+相关教程参考：
 
 
