@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+  MAGI SYSTEM — 三贤者决策系统
+  Version: 2.6.0
+  
+  Copyright (c) 2026 Peter Pan
+  Licensed under the MIT License
+  
+  Inspired by Neon Genesis Evangelion (GAINAX / KHARA)
+  This is a fan-made educational/entertainment project.
+  
+  GitHub: https://github.com/PDLMAX/MAGI-SYSTEM.git
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAGI SYSTEM — 三贤者决策系统</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'MAGI';
+    src: local('Courier New'), local('Consolas'), monospace;
+  }
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00cc33;
+    --green-glow: #00ff4188;
+    --red: #ff3333;
+    --red-glow: #ff333388;
+    --orange: #ff6600;
+    --orange-glow: #ff660088;
+    --bg: #0a0a0a;
+    --panel-bg: #0d1a0d;
+    --border: #1a3a1a;
+    --text-dim: #336633;
+    --scanline-opacity: 0.03;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'MAGI', 'Courier New', Consolas, monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ===== CRT SCANLINE OVERLAY ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, var(--scanline-opacity)) 2px,
+      rgba(0, 255, 65, var(--scanline-opacity)) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ===== FLICKER ANIMATION ===== */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.8; }
+    94% { opacity: 1; }
+    96% { opacity: 0.9; }
+    97% { opacity: 1; }
+  }
+
+  @keyframes textGlow {
+    0%, 100% { text-shadow: 0 0 5px var(--green-glow), 0 0 10px var(--green-glow); }
+    50% { text-shadow: 0 0 8px var(--green-glow), 0 0 20px var(--green-glow), 0 0 30px var(--green-glow); }
+  }
+
+  @keyframes redGlow {
+    0%, 100% { text-shadow: 0 0 5px var(--red-glow), 0 0 10px var(--red-glow); }
+    50% { text-shadow: 0 0 8px var(--red-glow), 0 0 20px var(--red-glow), 0 0 30px var(--red-glow); }
+  }
+
+  @keyframes borderPulse {
+    0%, 100% { border-color: var(--green); box-shadow: 0 0 5px var(--green-glow), inset 0 0 5px var(--green-glow); }
+    50% { border-color: var(--green-dim); box-shadow: 0 0 10px var(--green-glow), inset 0 0 10px var(--green-glow); }
+  }
+
+  @keyframes rotateDash {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes thinking {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes voteApprove {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: var(--green); text-shadow: 0 0 20px var(--green); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes voteReject {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: var(--red); text-shadow: 0 0 20px var(--red); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes dataStream {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  /* ===== LAYOUT ===== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: flicker 8s infinite;
+  }
+
+  /* ===== TOP SYSTEM INFO ===== */
+  .system-header {
+    border: 1px solid var(--border);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    background: var(--panel-bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .system-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    animation: borderPulse 3s infinite;
+  }
+
+  .header-line {
+    font-size: 13px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+  }
+
+  .header-line .label {
+    color: var(--orange);
+    margin-right: 8px;
+  }
+
+  .header-line .value {
+    color: var(--green);
+  }
+
+  .header-line .value.red {
+    color: var(--red);
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    animation: textGlow 4s infinite;
+  }
+
+  .header-title .blink-cursor {
+    animation: blink 1s infinite;
+  }
+
+  .motion-box {
+    display: inline-block;
+    border: 1px solid var(--orange);
+    padding: 4px 12px;
+    margin-top: 4px;
+    font-size: 16px;
+    letter-spacing: 4px;
+    color: var(--orange);
+    animation: textGlow 2s infinite;
+  }
+
+  /* ===== MAIN AREA ===== */
+  .main-area {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* ===== MAGI TRIANGLE ===== */
+  .magi-container {
+    position: relative;
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .magi-center-label {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 10px;
+    animation: textGlow 3s infinite;
+    margin: 10px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .magi-nodes {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    flex-wrap: wrap;
+  }
+
+  .magi-node {
+    border: 2px solid var(--green);
+    padding: 20px 25px;
+    min-width: 200px;
+    text-align: center;
+    background: var(--panel-bg);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: borderPulse 3s infinite;
+    flex: 1;
+    margin: 10px;
+    max-width: 320px;
+  }
+
+  .magi-node:hover {
+    background: rgba(0, 255, 65, 0.05);
+    box-shadow: 0 0 20px var(--green-glow), inset 0 0 20px rgba(0,255,65,0.05);
+  }
+
+  .magi-node.active {
+    border-color: var(--green);
+    box-shadow: 0 0 30px var(--green-glow), inset 0 0 30px rgba(0,255,65,0.1);
+  }
+
+  .magi-node.thinking {
+    border-color: var(--orange);
+    box-shadow: 0 0 30px var(--orange-glow);
+  }
+
+  .node-name {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 5px;
+  }
+
+  .node-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .node-verdict {
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    padding: 8px 0;
+    transition: all 0.3s;
+  }
+
+  .node-verdict.approve {
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green-glow), 0 0 20px var(--green-glow);
+  }
+
+  .node-verdict.reject {
+    color: var(--red);
+    text-shadow: 0 0 10px var(--red-glow), 0 0 20px var(--red-glow);
+  }
+
+  .node-verdict.pending {
+    color: var(--text-dim);
+  }
+
+  .node-verdict.thinking-state {
+    color: var(--orange);
+    animation: thinking 1s infinite;
+  }
+
+  .node-status {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .node-status .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 5px;
+    animation: blink 2s infinite;
+  }
+
+  .node-status .status-dot.orange {
+    background: var(--orange);
+  }
+
+  /* Connecting lines (visual only) */
+  .connections {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== INPUT AREA ===== */
+  .input-section {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    background: var(--panel-bg);
+  }
+
+  .input-label {
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .query-input {
+    flex: 1;
+    background: rgba(0, 255, 65, 0.03);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 15px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+  }
+
+  .query-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 10px var(--green-glow), inset 0 0 10px rgba(0,255,65,0.03);
+  }
+
+  .query-input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .btn {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 24px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 15px var(--green-glow);
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn.red {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .btn.red:hover {
+    background: rgba(255, 51, 51, 0.1);
+    box-shadow: 0 0 15px var(--red-glow);
+  }
+
+  .btn.orange {
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+
+  .btn.orange:hover {
+    background: rgba(255, 102, 0, 0.1);
+    box-shadow: 0 0 15px var(--orange-glow);
+  }
+
+  /* ===== SELECTOR ROW ===== */
+  .selector-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .mode-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-right: 5px;
+  }
+
+  .mode-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+  }
+
+  .mode-btn:hover, .mode-btn.active {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .mode-btn.active {
+    background: rgba(0, 255, 65, 0.08);
+  }
+
+  /* ===== RESPONSE AREA ===== */
+  .response-section {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+  }
+
+  .response-panel {
+    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    padding: 15px;
+    min-height: 150px;
+    display: none;
+    animation: slideIn 0.3s ease;
+  }
+
+  .response-panel.visible {
+    display: block;
+  }
+
+  .response-panel .panel-header {
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .response-panel .panel-header .node-tag {
+    color: var(--orange);
+  }
+
+  .response-panel .panel-header .model-tag {
+    color: var(--text-dim);
+    font-size: 10px;
+  }
+
+  .response-text {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .response-text .cursor-blink {
+    animation: blink 0.8s infinite;
+    color: var(--green);
+  }
+
+  /* ===== VOTING RESULT ===== */
+  .voting-result {
+    margin-top: 20px;
+    text-align: center;
+    padding: 20px;
+    border: 1px solid var(--border);
+    background: var(--panel-bg);
+    display: none;
+  }
+
+  .voting-result.visible {
+    display: block;
+    animation: slideIn 0.5s ease;
+  }
+
+  .voting-result .result-label {
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+
+  .voting-result .result-verdict {
+    font-size: 36px;
+    font-weight: bold;
+    letter-spacing: 12px;
+    animation: textGlow 2s infinite;
+  }
+
+  .voting-result .result-verdict.approved {
+    color: var(--green);
+    text-shadow: 0 0 15px var(--green-glow), 0 0 30px var(--green-glow);
+  }
+
+  .voting-result .result-verdict.rejected {
+    color: var(--red);
+    text-shadow: 0 0 15px var(--red-glow), 0 0 30px var(--red-glow);
+  }
+
+  .voting-result .result-verdict.split {
+    color: var(--orange);
+    text-shadow: 0 0 15px var(--orange-glow);
+  }
+
+  .voting-result .vote-count {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: 2px;
+  }
+
+  /* ===== SINGLE CHAT MODE ===== */
+  .chat-section {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .chat-section.visible {
+    display: block;
+  }
+
+  .chat-header {
+    font-size: 14px;
+    letter-spacing: 3px;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .chat-messages {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) var(--bg);
+  }
+
+  .chat-messages::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .chat-messages::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: var(--green-dim);
+  }
+
+  .chat-msg {
+    margin-bottom: 15px;
+    animation: slideIn 0.3s ease;
+  }
+
+  .chat-msg .msg-sender {
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+  }
+
+  .chat-msg .msg-text {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--green);
+    padding: 10px 15px;
+    border-left: 2px solid var(--green);
+    background: rgba(0, 255, 65, 0.02);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .chat-msg.user .msg-text {
+    border-left-color: var(--orange);
+    color: var(--orange);
+    background: rgba(255, 102, 0, 0.02);
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px 15px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    padding: 15px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ===== DATA STREAM BACKGROUND ===== */
+  .data-stream-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .data-stream-char {
+    position: absolute;
+    font-size: 10px;
+    color: var(--green);
+    opacity: 0.04;
+    animation: dataStream linear infinite;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .magi-nodes {
+      flex-direction: column;
+    }
+    .magi-node {
+      max-width: 100%;
+    }
+    .response-section {
+      grid-template-columns: 1fr;
+    }
+    .header-title {
+      font-size: 14px;
+    }
+    .node-verdict {
+      font-size: 24px;
+    }
+  }
+
+  /* ===== LOADING DOTS ===== */
+  .loading-dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+  }
+
+  /* ===== BOOT SEQUENCE ===== */
+  .boot-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: opacity 0.5s;
+  }
+
+  .boot-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .boot-text {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--green);
+    line-height: 2;
+  }
+
+  .boot-text .done {
+    color: var(--green);
+  }
+
+  .boot-title {
+    font-size: 24px;
+    letter-spacing: 8px;
+    margin-bottom: 30px;
+    animation: textGlow 2s infinite;
+  }
+
+  /* ===== HEXAGON NODES (EVA style) ===== */
+  .hex-node {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    /* Not used for the rectangular look, but available */
+  }
+
+  /* ===== CONNECTION LINES SVG ===== */
+  .magi-svg {
+    width: 100%;
+    height: 60px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .magi-svg line {
+    stroke: var(--green);
+    stroke-width: 2;
+    stroke-dasharray: 8 4;
+    animation: borderPulse 2s infinite;
+    opacity: 0.4;
+  }
+
+  .magi-svg polygon {
+    fill: var(--green);
+    opacity: 0.8;
+  }
+
+  .magi-svg text {
+    fill: var(--green);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    text-anchor: middle;
+  }
+
+  /* ===== BOTTOM INFO PANEL ===== */
+  .info-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .info-item {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    background: var(--panel-bg);
+  }
+
+  .info-item .info-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .info-item .info-value {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .info-item .info-value.green { color: var(--green); }
+  .info-item .info-value.red { color: var(--red); }
+  .info-item .info-value.orange { color: var(--orange); }
+  .info-item .info-value.dim { color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-title">MAGI SYSTEM</div>
+  <div class="boot-text" id="bootText"></div>
+</div>
+
+<!-- DATA STREAM BACKGROUND -->
+<div class="data-stream-bg" id="dataStreamBg"></div>
+
+<!-- MAIN CONTAINER -->
+<div class="container" id="mainContainer" style="display:none;">
+
+  <!-- SYSTEM HEADER -->
+  <div class="system-header">
+    <div class="header-title">
+      ◈ DIRECT LINK CONNECTION : MAGI-01 <span class="blink-cursor"></span>
+    </div>
+    <div class="header-line">
+      <span class="label">ACCESS MODE :</span>
+      <span class="value">SUPERUSER</span>
+    </div>
+    <div class="header-line">
+      <span class="label">RESULT OF THE DELIBERATION :</span>
+      <span class="value" id="deliberationResult">—</span>
+    </div>
+    <div class="header-line">
+      <span class="label">MOTION :</span>
+      <span class="value red" id="motionText">STANDBY</span>
+    </div>
+    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; gap: 30px; flex-wrap: wrap;">
+      <span class="header-line" style="margin:0;"><span class="label">CODE :</span><span class="value" id="codeValue">—</span></span>
+      <span class="header-line" style="margin:0;"><span class="label">PRIORITY :</span><span class="value">AAA</span></span>
+      <span class="header-line" style="margin:0;"><span class="label">STATUS :</span><span class="value green" id="sysStatus">ONLINE</span></span>
+      <span class="header-line" style="margin:0;"><span class="label">SESSION :</span><span class="value" id="sessionId">—</span></span>
+    </div>
+  </div>
+
+  <!-- MAGI TRIANGLE -->
+  <div class="magi-container">
+    <div class="magi-nodes">
+      <!-- CASPER -->
+      <div class="magi-node" id="node-casper" onclick="selectSingleNode('casper')">
+        <div class="node-name">CASPER-3</div>
+        <div class="node-subtitle">豆包 · 理性分析</div>
+        <div class="node-verdict pending" id="verdict-casper">—</div>
+        <div class="node-status">
+          <span class="status-dot" id="dot-casper"></span>
+          <span id="status-casper">STANDBY</span>
+        </div>
+      </div>
+
+      <!-- CENTER -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div style="height:30px;"></div>
+        <div class="magi-center-label"> MAGI ◈</div>
+        <div style="height:30px;"></div>
+      </div>
+
+      <!-- BALTHASAR -->
+      <div class="magi-node" id="node-balthasar" onclick="selectSingleNode('balthasar')">
+        <div class="node-name">BALTHASAR-2</div>
+        <div class="node-subtitle">千问 · 逻辑推演</div>
+        <div class="node-verdict pending" id="verdict-balthasar">—</div>
+        <div class="node-status">
+          <span class="status-dot" id="dot-balthasar"></span>
+          <span id="status-balthasar">STANDBY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MELCHIOR (below center) -->
+    <div style="display:flex;justify-content:center;margin-top:15px;">
+      <div class="magi-node" id="node-melchior" onclick="selectSingleNode('melchior')" style="max-width:320px;">
+        <div class="node-name">MELCHIOR-1</div>
+        <div class="node-subtitle">DeepSeek · 深度计算</div>
+        <div class="node-verdict pending" id="verdict-melchior">—</div>
+        <div class="node-status">
+          <span class="status-dot" id="dot-melchior"></span>
+          <span id="status-melchior">STANDBY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG CONNECTION LINES -->
+    <svg class="magi-svg" viewBox="0 0 600 60" style="display:none;">
+      <!-- Dynamically generated -->
+    </svg>
+  </div>
+
+  <!-- VOTING RESULT -->
+  <div class="voting-result" id="votingResult">
+    <div class="result-label">◈ 三贤者最终决议 ◈</div>
+    <div class="result-verdict" id="resultVerdict">—</div>
+    <div class="vote-count" id="voteCount">—</div>
+  </div>
+
+  <!-- INPUT SECTION -->
+  <div class="input-section">
+    <div class="input-label"> 输入查询 / INPUT QUERY ◈</div>
+    <div class="input-row">
+      <input type="text" class="query-input" id="queryInput" placeholder="请输入您的问题..." autocomplete="off">
+      <button class="btn" onclick="submitQuery()">执行</button>
+      <button class="btn red" onclick="clearAll()">重置</button>
+    </div>
+    <div class="selector-row">
+      <span class="mode-label">模式 :</span>
+      <button class="mode-btn active" id="mode-all" onclick="setMode('all')">三贤者表决</button>
+      <button class="mode-btn" id="mode-casper" onclick="setMode('single')">单模型对话</button>
+    </div>
+    <div class="selector-row" id="singleSelector" style="display:none;">
+      <span class="mode-label">选择模型 :</span>
+      <button class="mode-btn active" data-node="casper" onclick="setSingleNode('casper')">CASPER · 豆包</button>
+      <button class="mode-btn" data-node="balthasar" onclick="setSingleNode('balthasar')">BALTHASAR · 千问</button>
+      <button class="mode-btn" data-node="melchior" onclick="setSingleNode('melchior')">MELCHIOR · DeepSeek</button>
+    </div>
+  </div>
+
+  <!-- RESPONSE PANELS -->
+  <div class="response-section" id="responseSection">
+    <div class="response-panel" id="panel-casper">
+      <div class="panel-header">
+        <span class="node-tag">CASPER-3</span>
+        <span class="model-tag">豆包 Doubao</span>
+      </div>
+      <div class="response-text" id="response-casper"></div>
+    </div>
+    <div class="response-panel" id="panel-balthasar">
+      <div class="panel-header">
+        <span class="node-tag">BALTHASAR-2</span>
+        <span class="model-tag">千问 Qwen</span>
+      </div>
+      <div class="response-text" id="response-balthasar"></div>
+    </div>
+    <div class="response-panel" id="panel-melchior">
+      <div class="panel-header">
+        <span class="node-tag">MELCHIOR-1</span>
+        <span class="model-tag">DeepSeek</span>
+      </div>
+      <div class="response-text" id="response-melchior"></div>
+    </div>
+  </div>
+
+  <!-- SINGLE CHAT -->
+  <div class="chat-section" id="chatSection">
+    <div class="chat-header">
+      <span id="chatTitle">◈ CASPER-3 对话通道 ◈</span>
+      <button class="btn" style="padding:4px 12px;font-size:10px;" onclick="closeSingleChat()">关闭</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" class="query-input" id="chatInput" placeholder="输入消息..." autocomplete="off" style="flex:1;">
+      <button class="btn" onclick="sendChat()" style="padding:10px 20px;">发送</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM INFO -->
+  <div class="info-panel">
+    <div class="info-item">
+      <div class="info-label">SYSTEM</div>
+      <div class="info-value green">MAGI-01</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">CONNECTION</div>
+      <div class="info-value green">DIRECT LINK</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">LAYER 1</div>
+      <div class="info-value dim">LA31 - Basic Interface</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">LAYER 2</div>
+      <div class="info-value dim">Q.921 - LAPD</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">LAYER 3</div>
+      <div class="info-value dim">Connection Control</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">EXTENTION</div>
+      <div class="info-value green" id="extValue">4096</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    MAGI SYSTEM v2.6.0 — NERV SUPERCOMPUTER DIVISION — CLASSIFIED
+  </div>
+</div>
+
+<script>
+// ===== CONFIGURATION =====
+// 在此处配置你的 API Key 和模型信息
+const CONFIG = {
+  nodes: {
+    casper: {
+      name: 'CASPER-3',
+      subtitle: '豆包 · 理性分析',
+      model: 'doubao',
+      apiEndpoint: '',  // 配置你的豆包 API 端点
+      apiKey: '',       // 配置你的豆包 API Key
+      chatHistory: []
+    },
+    balthasar: {
+      name: 'BALTHASAR-2',
+      subtitle: '千问 · 逻辑推演',
+      model: 'qwen',
+      apiEndpoint: '',  // 配置你的千问 API 端点
+      apiKey: '',       // 配置你的千问 API Key
+      chatHistory: []
+    },
+    melchior: {
+      name: 'MELCHIOR-1',
+      subtitle: 'DeepSeek · 深度计算',
+      model: 'deepseek',
+      apiEndpoint: '',  // 配置你的 DeepSeek API 端点
+      apiKey: '',       // 配置你的 DeepSeek API Key
+      chatHistory: []
+    }
+  },
+  // 如果没有配置 API，使用模拟数据
+  demoMode: true
+};
+
+// ===== STATE =====
+let currentMode = 'all';
+let currentSingleNode = 'casper';
+let isProcessing = false;
+
+// ===== BOOT SEQUENCE =====
+async function bootSequence() {
+  const bootLines = [
+    'INITIALIZING MAGI SUPERCOMPUTER...',
+    'LOADING CASPER-3 MODULE ........... OK',
+    'LOADING BALTHASAR-2 MODULE ........ OK',
+    'LOADING MELCHIOR-1 MODULE ......... OK',
+    'ESTABLISHING DIRECT LINK CONNECTION',
+    'ACCESS MODE : SUPERUSER',
+    'ALL SYSTEMS NOMINAL',
+    '',
+    'MAGI SYSTEM ONLINE'
+  ];
+
+  const bootText = document.getElementById('bootText');
+
+  for (let i = 0; i < bootLines.length; i++) {
+    await delay(i === 0 ? 300 : 200 + Math.random() * 400);
+    const span = document.createElement('div');
+    span.textContent = bootLines[i];
+    if (bootLines[i].includes('OK')) {
+      span.innerHTML = bootLines[i].replace('OK', '<span class="done">OK</span>');
+    }
+    bootText.appendChild(span);
+  }
+
+  await delay(800);
+  document.getElementById('bootScreen').classList.add('hidden');
+  document.getElementById('mainContainer').style.display = 'block';
+
+  // Generate session ID
+  const sessionId = 'SES-' + Date.now().toString(36).toUpperCase();
+  document.getElementById('sessionId').textContent = sessionId;
+
+  // Generate random code
+  const code = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+  document.getElementById('codeValue').textContent = code;
+
+  // Start data stream background
+  createDataStream();
+
+  // Focus input
+  document.getElementById('queryInput').focus();
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ===== DATA STREAM BACKGROUND =====
+function createDataStream() {
+  const container = document.getElementById('dataStreamBg');
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+
+  for (let i = 0; i < 30; i++) {
+    const span = document.createElement('span');
+    span.className = 'data-stream-char';
+    span.style.left = Math.random() * 100 + '%';
+    span.style.animationDuration = (8 + Math.random() * 12) + 's';
+    span.style.animationDelay = Math.random() * 10 + 's';
+    span.style.fontSize = (8 + Math.random() * 6) + 'px';
+    container.appendChild(span);
+
+    setInterval(() => {
+      span.textContent = chars[Math.floor(Math.random() * chars.length)];
+    }, 200 + Math.random() * 300);
+  }
+}
+
+// ===== MODE SELECTION =====
+function setMode(mode) {
+  currentMode = mode;
+
+  document.getElementById('mode-all').classList.toggle('active', mode === 'all');
+  document.getElementById('mode-casper').classList.toggle('active', mode === 'single');
+  document.getElementById('singleSelector').style.display = mode === 'single' ? 'flex' : 'none';
+
+  if (mode === 'single') {
+    showSingleNode(currentSingleNode);
+  } else {
+    closeSingleChat();
+  }
+}
+
+function setSingleNode(node) {
+  currentSingleNode = node;
+  document.querySelectorAll('#singleSelector .mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.node === node);
+  });
+  showSingleNode(node);
+}
+
+function showSingleNode(node) {
+  const chatSection = document.getElementById('chatSection');
+  const title = document.getElementById('chatTitle');
+  const cfg = CONFIG.nodes[node];
+
+  title.textContent = `◈ ${cfg.name} 对话通道 ◈`;
+  chatSection.classList.add('visible');
+  document.getElementById('chatInput').focus();
+}
+
+function selectSingleNode(node) {
+  setMode('single');
+  setSingleNode(node);
+}
+
+function closeSingleChat() {
+  document.getElementById('chatSection').classList.remove('visible');
+}
+
+// ===== SUBMIT QUERY =====
+async function submitQuery() {
+  const input = document.getElementById('queryInput');
+  const query = input.value.trim();
+  if (!query || isProcessing) return;
+
+  isProcessing = true;
+  input.value = '';
+
+  if (currentMode === 'all') {
+    await runAllNodes(query);
+  } else {
+    await runSingleNode(currentSingleNode, query);
+  }
+
+  isProcessing = false;
+  input.focus();
+}
+
+// ===== RUN ALL NODES (VOTING MODE) =====
+async function runAllNodes(query) {
+  // Reset all nodes
+  const nodes = ['casper', 'balthasar', 'melchior'];
+  const results = {};
+
+  // Update header
+  document.getElementById('motionText').textContent = query.substring(0, 40) + (query.length > 40 ? '...' : '');
+  document.getElementById('deliberationResult').textContent = 'DELIBERATING...';
+  document.getElementById('sysStatus').textContent = 'PROCESSING';
+  document.getElementById('sysStatus').className = 'value orange';
+
+  // Show all panels
+  nodes.forEach(node => {
+    document.getElementById(`panel-${node}`).classList.add('visible');
+    document.getElementById(`response-${node}`).innerHTML = '<span class="cursor-blink"></span>';
+    document.getElementById(`node-${node}`).classList.add('thinking');
+    document.getElementById(`verdict-${node}`).textContent = '—';
+    document.getElementById(`verdict-${node}`).className = 'node-verdict thinking-state';
+    document.getElementById(`status-${node}`).textContent = 'COMPUTING';
+    document.getElementById(`dot-${node}`).classList.add('orange');
+  });
+
+  document.getElementById('votingResult').classList.remove('visible');
+
+  // Run all three in parallel
+  const promises = nodes.map(async node => {
+    // Simulate thinking time
+    await delay(1000 + Math.random() * 2000);
+
+    let response;
+    if (CONFIG.demoMode) {
+      response = generateDemoResponse(node, query);
+    } else {
+      response = await callAPI(node, query);
+    }
+
+    results[node] = response;
+
+    // Typewriter effect
+    await typewriter(`response-${node}`, response);
+
+    // Verdict (random for demo, based on response for real)
+    const approve = Math.random() > 0.3;
+    const verdictEl = document.getElementById(`verdict-${node}`);
+    verdictEl.textContent = approve ? '承認' : '否定';
+    verdictEl.className = approve ? 'node-verdict approve' : 'node-verdict reject';
+
+    document.getElementById(`node-${node}`).classList.remove('thinking');
+    document.getElementById(`status-${node}`).textContent = 'COMPLETE';
+    document.getElementById(`dot-${node}`).classList.remove('orange');
+
+    // Add vote animation
+    verdictEl.style.animation = approve ? 'voteApprove 0.5s ease' : 'voteReject 0.5s ease';
+    setTimeout(() => { verdictEl.style.animation = ''; }, 500);
+  });
+
+  await Promise.all(promises);
+
+  // Calculate final result
+  const approveCount = Object.values(results).length > 0
+    ? nodes.filter(n => document.getElementById(`verdict-${n}`).textContent === '承認').length
+    : 0;
+
+  const resultVerdict = document.getElementById('resultVerdict');
+  const voteCount = document.getElementById('voteCount');
+
+  if (approveCount >= 2) {
+    resultVerdict.textContent = '承認 APPROVED';
+    resultVerdict.className = 'result-verdict approved';
+    document.getElementById('deliberationResult').textContent = 'APPROVED';
+    document.getElementById('deliberationResult').className = 'value';
+  } else {
+    resultVerdict.textContent = '否定 REJECTED';
+    resultVerdict.className = 'result-verdict rejected';
+    document.getElementById('deliberationResult').textContent = 'REJECTED';
+    document.getElementById('deliberationResult').className = 'value red';
+  }
+
+  voteCount.textContent = `${approveCount} / 3 赞成`;
+  document.getElementById('votingResult').classList.add('visible');
+
+  document.getElementById('sysStatus').textContent = 'ONLINE';
+  document.getElementById('sysStatus').className = 'value green';
+}
+
+// ===== RUN SINGLE NODE =====
+async function runSingleNode(node, query) {
+  const chatSection = document.getElementById('chatSection');
+  const chatMessages = document.getElementById('chatMessages');
+  const cfg = CONFIG.nodes[node];
+
+  chatSection.classList.add('visible');
+
+  // Add user message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'chat-msg user';
+  userMsg.innerHTML = `<div class="msg-sender">USER</div><div class="msg-text">${escapeHtml(query)}</div>`;
+  chatMessages.appendChild(userMsg);
+
+  // Add AI message placeholder
+  const aiMsg = document.createElement('div');
+  aiMsg.className = 'chat-msg';
+  aiMsg.innerHTML = `<div class="msg-sender">${cfg.name}</div><div class="msg-text" id="chat-response"></div>`;
+  chatMessages.appendChild(aiMsg);
+
+  const responseEl = document.getElementById('chat-response');
+  responseEl.innerHTML = '<span class="cursor-blink">▌</span>';
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  await delay(800 + Math.random() * 1500);
+
+  let response;
+  if (CONFIG.demoMode) {
+    response = generateDemoResponse(node, query);
+  } else {
+    response = await callAPI(node, query);
+  }
+
+  cfg.chatHistory.push({ role: 'user', content: query });
+  cfg.chatHistory.push({ role: 'assistant', content: response });
+
+  await typewriter('chat-response', response);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  input.value = '';
+  runSingleNode(currentSingleNode, query);
+}
+
+// ===== API CALL (placeholder) =====
+async function callAPI(node, query) {
+  const cfg = CONFIG.nodes[node];
+
+  // 这里接入真实的 API 调用
+  // 示例：千问 API
+  if (node === 'balthasar') {
+    try {
+      const resp = await fetch(cfg.apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cfg.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'qwen-plus',
+          messages: [
+            { role: 'system', content: '你是MAGI系统中的BALTHASAR-2，负责逻辑推演。请以简洁专业的风格回答。' },
+            ...cfg.chatHistory.slice(-10),
+            { role: 'user', content: query }
+          ]
+        })
+      });
+      const data = await resp.json();
+      return data.choices?.[0]?.message?.content || 'ERROR: NO RESPONSE';
+    } catch (e) {
+      return `API ERROR: ${e.message}`;
+    }
+  }
+
+  // 类似地配置豆包和 DeepSeek 的 API 调用
+  return 'API 尚未配置，请在 CONFIG 中设置 apiEndpoint 和 apiKey';
+}
+
+// ===== DEMO RESPONSES =====
+function generateDemoResponse(node, query) {
+  const responses = {
+    casper: [
+      `经 CASPER-3 理性分析模块计算：\n\n关于「${query.substring(0, 30)}...」的问题，\n\n从常识和理性角度评估，该议题需要多维度考量。关键因素包括：\n\n1. 事实基础 — 需验证信息来源的可靠性\n2. 逻辑一致性 — 论证链条是否完整\n3. 风险评估 — 潜在影响范围\n\n▶ 初步判断：需要进一步数据支撑\n▶ 建议：启动辅助分析程序`,
+      `CASPER-3 分析报告\n━━━━━━━━━━━━━━━━\n\n输入参数：${query.substring(0, 40)}\n处理状态：完成\n\n经综合评估，该问题涉及多个层面的分析。\n从理性角度出发，建议采取谨慎态度。\n\n置信度：0.847\n风险等级：中等\n\n◈ 建议方案：\n  - 收集更多数据样本\n  - 进行交叉验证\n  - 建立备用方案`,
+    ],
+    balthasar: [
+      `BALTHASAR-2 逻辑推演结果\n━━━━━━━━━━━━━━━━\n\n命题：${query.substring(0, 40)}\n\n推演过程：\n  前提 P1 → 中间结论 C1\n  前提 P2 → 中间结论 C2\n  C1 ∧ C2 → 最终结论\n\n逻辑链完整性：✓\n推理有效性：✓\n结论可靠性：0.793\n\n▶ 推演结论：命题成立，但存在一定不确定性\n▶ 建议：结合 CASPER-3 的事实分析进行综合判断`,
+      `BALTHASAR-2 计算输出\n━━━━━━━━━━━━━━━━\n\n对输入「${query.substring(0, 30)}...」进行逻辑分析：\n\n─ 分析维度 ─────────────┐\n│ 逻辑一致性    ████░░ 80% │\n│ 论证充分性    ███░░░ 60% │\n│ 结论可信度    ████░░ 75% │\n└──────────────────────────┘\n\n◈ 综合评分：71.7/100\n◈ 判定：基本成立\n◈ 置信区间：[0.68, 0.82]`,
+    ],
+    melchior: [
+      `MELCHIOR-1 深度计算报告\n━━━━━━━━━━━━━━━━\n\n查询：${query.substring(0, 40)}\n计算深度：7 层神经网络\n处理时间：0.0034s\n\n 数据检索完成 — 命中 1,247 条相关记录\n 模式识别完成 — 匹配度 0.921\n▸ 预测模型运行 — 输出已生成\n\n分析结果：\n  经过深度计算和模式匹配，该问题\n  的答案具有较高的确定性。\n\n◈ 推荐行动：执行方案 A\n◈ 成功率预估：87.3%`,
+      `MELCHIOR-1 // 计算引擎\n━━━━━━━━━━━━━━━━\n\nINPUT: ${query.substring(0, 30)}\n\n[处理中...]\n  → 数据层分析    ████████░░ 完成\n  → 模式匹配      █████████░ 完成\n  → 深度推理      ████████░░ 完成\n  → 结果生成      ██████████ 完成\n\nOUTPUT:\n  经 MELCHIOR-1 深度计算，综合分析\n  各方面因素后得出结论：\n\n  该方案可行，建议推进实施。\n  详细风险评估见附加报告。\n\n◈ 计算置信度：92.1%`,
+    ]
+  };
+
+  const nodeResponses = responses[node];
+  return nodeResponses[Math.floor(Math.random() * nodeResponses.length)];
+}
+
+// ===== TYPEWRITER EFFECT =====
+async function typewriter(elementId, text) {
+  const el = document.getElementById(elementId);
+  el.textContent = '';
+
+  const chars = text.split('');
+  let current = '';
+
+  for (let i = 0; i < chars.length; i++) {
+    current += chars[i];
+    el.textContent = current + '▌';
+
+    // Speed: faster for non-CJK chars
+    const isCJK = /[\u4e00-\u9fff\u3400-\u4dbf]/.test(chars[i]);
+    await delay(isCJK ? 15 : 8);
+  }
+
+  el.textContent = current;
+}
+
+// ===== CLEAR ALL =====
+function clearAll() {
+  const nodes = ['casper', 'balthasar', 'melchior'];
+
+  nodes.forEach(node => {
+    document.getElementById(`panel-${node}`).classList.remove('visible');
+    document.getElementById(`response-${node}`).textContent = '';
+    document.getElementById(`verdict-${node}`).textContent = '—';
+    document.getElementById(`verdict-${node}`).className = 'node-verdict pending';
+    document.getElementById(`node-${node}`).classList.remove('thinking');
+    document.getElementById(`status-${node}`).textContent = 'STANDBY';
+    document.getElementById(`dot-${node}`).classList.remove('orange');
+  });
+
+  document.getElementById('votingResult').classList.remove('visible');
+  document.getElementById('motionText').textContent = 'STANDBY';
+  document.getElementById('deliberationResult').textContent = '—';
+  document.getElementById('deliberationResult').className = 'value';
+  document.getElementById('sysStatus').textContent = 'ONLINE';
+  document.getElementById('sysStatus').className = 'value green';
+
+  // Clear chat
+  document.getElementById('chatMessages').innerHTML = '';
+
+  // Generate new code
+  const code = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+  document.getElementById('codeValue').textContent = code;
+
+  document.getElementById('queryInput').focus();
+}
+
+// ===== UTILITY =====
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const active = document.activeElement;
+    if (active.id === 'queryInput') {
+      submitQuery();
+    } else if (active.id === 'chatInput') {
+      sendChat();
+    }
+  }
+  if (e.key === 'Escape') {
+    clearAll();
+  }
+});
+
+// ===== START =====
+window.addEventListener('load', bootSequence);
+</script>
+</body>
+</html>
