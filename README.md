@@ -163,9 +163,12 @@ API Key 无效，检查是否正确复制。
 
 ## 🎬 演示
 
-![Demo](https://via.placeholder.com/800x450.png?text=MAGI+SYSTEM+Demo)
+<img width="1302" height="815" alt="截屏2026-04-29 02 03 57" src="https://github.com/user-attachments/assets/0aad79fd-aa8f-4d8f-8ec7-3c72f3b71541" />
 
-*系统启动界面*
+<img width="1350" height="812" alt="截屏2026-04-29 02 04 35" src="https://github.com/user-attachments/assets/1d4fd99a-f3ff-48ac-af48-b93bcaec0023" />
+
+
+*系统界面*
 
 ---
 
