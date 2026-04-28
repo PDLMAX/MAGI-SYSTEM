@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <!--
   MAGI SYSTEM — 三贤者决策系统
-  Version: 2.6.0
+  Version: 3.0.0 (Single Provider)
   
   Copyright (c) 2026 Peter Pan
   Licensed under the MIT License
@@ -11,6 +11,11 @@
   This is a fan-made educational/entertainment project.
   
   GitHub: https://github.com/PDLMAX/MAGI-SYSTEM.git
+  
+  Changelog v3.0.0:
+  - Unified to single Doubao API provider
+  - Three personas via system prompts: Rational Analysis, Logical Deduction, Deep Computation
+  - Simplified configuration: one API key for all nodes
 -->
 <head>
 <meta charset="UTF-8">
@@ -860,7 +865,7 @@
       <!-- CASPER -->
       <div class="magi-node" id="node-casper" onclick="selectSingleNode('casper')">
         <div class="node-name">CASPER-3</div>
-        <div class="node-subtitle">豆包 · 理性分析</div>
+        <div class="node-subtitle">理性分析</div>
         <div class="node-verdict pending" id="verdict-casper">—</div>
         <div class="node-status">
           <span class="status-dot" id="dot-casper"></span>
@@ -878,7 +883,7 @@
       <!-- BALTHASAR -->
       <div class="magi-node" id="node-balthasar" onclick="selectSingleNode('balthasar')">
         <div class="node-name">BALTHASAR-2</div>
-        <div class="node-subtitle">千问 · 逻辑推演</div>
+        <div class="node-subtitle">逻辑推演</div>
         <div class="node-verdict pending" id="verdict-balthasar">—</div>
         <div class="node-status">
           <span class="status-dot" id="dot-balthasar"></span>
@@ -891,7 +896,7 @@
     <div style="display:flex;justify-content:center;margin-top:15px;">
       <div class="magi-node" id="node-melchior" onclick="selectSingleNode('melchior')" style="max-width:320px;">
         <div class="node-name">MELCHIOR-1</div>
-        <div class="node-subtitle">DeepSeek · 深度计算</div>
+        <div class="node-subtitle">深度计算</div>
         <div class="node-verdict pending" id="verdict-melchior">—</div>
         <div class="node-status">
           <span class="status-dot" id="dot-melchior"></span>
@@ -928,9 +933,9 @@
     </div>
     <div class="selector-row" id="singleSelector" style="display:none;">
       <span class="mode-label">选择模型 :</span>
-      <button class="mode-btn active" data-node="casper" onclick="setSingleNode('casper')">CASPER · 豆包</button>
-      <button class="mode-btn" data-node="balthasar" onclick="setSingleNode('balthasar')">BALTHASAR · 千问</button>
-      <button class="mode-btn" data-node="melchior" onclick="setSingleNode('melchior')">MELCHIOR · DeepSeek</button>
+      <button class="mode-btn active" data-node="casper" onclick="setSingleNode('casper')">CASPER · 理性分析</button>
+      <button class="mode-btn" data-node="balthasar" onclick="setSingleNode('balthasar')">BALTHASAR · 逻辑推演</button>
+      <button class="mode-btn" data-node="melchior" onclick="setSingleNode('melchior')">MELCHIOR · 深度计算</button>
     </div>
   </div>
 
@@ -939,21 +944,21 @@
     <div class="response-panel" id="panel-casper">
       <div class="panel-header">
         <span class="node-tag">CASPER-3</span>
-        <span class="model-tag">豆包 Doubao</span>
+        <span class="model-tag">Doubao LLM</span>
       </div>
       <div class="response-text" id="response-casper"></div>
     </div>
     <div class="response-panel" id="panel-balthasar">
       <div class="panel-header">
         <span class="node-tag">BALTHASAR-2</span>
-        <span class="model-tag">千问 Qwen</span>
+        <span class="model-tag">Doubao LLM</span>
       </div>
       <div class="response-text" id="response-balthasar"></div>
     </div>
     <div class="response-panel" id="panel-melchior">
       <div class="panel-header">
         <span class="node-tag">MELCHIOR-1</span>
-        <span class="model-tag">DeepSeek</span>
+        <span class="model-tag">Doubao LLM</span>
       </div>
       <div class="response-text" id="response-melchior"></div>
     </div>
@@ -1009,35 +1014,35 @@
 <script>
 // ===== CONFIGURATION =====
 // 在此处配置你的 API Key 和模型信息
+// ⚠️ 请替换为你自己的火山引擎豆包 API 配置
 const CONFIG = {
+  // 统一使用 Doubao API，通过不同的人格设定实现差异化回答
+  apiEndpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',  // 【必填】替换为你的 API 端点
+  apiKey: 'YOUR_API_KEY_HERE',  // ⚠️【必填】替换为你的 API Key（示例：ark-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
+  model: 'YOUR_MODEL_ID_HERE',  // ⚠️【必填】替换为你的模型 ID（示例：ep-xxxxxxxxxxxxxx）
+  
   nodes: {
     casper: {
       name: 'CASPER-3',
-      subtitle: '豆包 · 理性分析',
-      model: 'doubao',
-      apiEndpoint: '',  // 配置你的豆包 API 端点
-      apiKey: '',       // 配置你的豆包 API Key
+      subtitle: '理性分析',
+      systemPrompt: '你是 MAGI 系统中的 CASPER-3，负责理性分析。你的特点是：\n- 从常识和理性角度评估问题\n- 注重事实基础和信息来源可靠性\n- 关注逻辑一致性和风险评估\n- 回答风格：冷静、客观、条理清晰\n- 输出格式：分点分析，给出初步判断和建议',
       chatHistory: []
     },
     balthasar: {
       name: 'BALTHASAR-2',
-      subtitle: '千问 · 逻辑推演',
-      model: 'qwen',
-      apiEndpoint: '',  // 配置你的千问 API 端点
-      apiKey: '',       // 配置你的千问 API Key
+      subtitle: '逻辑推演',
+      systemPrompt: '你是 MAGI 系统中的 BALTHASAR-2，负责逻辑推演。你的特点是：\n- 使用严密的逻辑推理分析问题\n- 构建前提→推论→结论的逻辑链\n- 评估论证的充分性和有效性\n- 回答风格：严谨、结构化、使用逻辑符号\n- 输出格式：展示推演过程，给出置信度和评分',
       chatHistory: []
     },
     melchior: {
       name: 'MELCHIOR-1',
-      subtitle: 'DeepSeek · 深度计算',
-      model: 'deepseek',
-      apiEndpoint: '',  // 配置你的 DeepSeek API 端点
-      apiKey: '',       // 配置你的 DeepSeek API Key
+      subtitle: '深度计算',
+      systemPrompt: '你是 MAGI 系统中的 MELCHIOR-1，负责深度计算。你的特点是：\n- 运用深度学习和模式识别分析问题\n- 进行多层次神经网络计算\n- 提供数据驱动的预测和评估\n- 回答风格：科技感、数据化、使用进度条和百分比\n- 输出格式：展示计算过程和置信度，给出推荐方案',
       chatHistory: []
     }
   },
   // 如果没有配置 API，使用模拟数据
-  demoMode: true
+  demoMode: false  // 改为 false 启用真实 API
 };
 
 // ===== STATE =====
@@ -1314,37 +1319,40 @@ function sendChat() {
 // ===== API CALL (placeholder) =====
 async function callAPI(node, query) {
   const cfg = CONFIG.nodes[node];
-
-  // 这里接入真实的 API 调用
-  // 示例：千问 API
-  if (node === 'balthasar') {
-    try {
-      const resp = await fetch(cfg.apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cfg.apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'qwen-plus',
-          messages: [
-            { role: 'system', content: '你是MAGI系统中的BALTHASAR-2，负责逻辑推演。请以简洁专业的风格回答。' },
-            ...cfg.chatHistory.slice(-10),
-            { role: 'user', content: query }
-          ]
-        })
-      });
-      const data = await resp.json();
-      return data.choices?.[0]?.message?.content || 'ERROR: NO RESPONSE';
-    } catch (e) {
-      return `API ERROR: ${e.message}`;
-    }
+  
+  // 检查 API 配置是否完整
+  if (!CONFIG.apiEndpoint || !CONFIG.apiKey) {
+    return `⚠️ API 配置缺失\n请在 CONFIG 中配置:\n- apiEndpoint\n- apiKey`;
   }
 
-  // 类似地配置豆包和 DeepSeek 的 API 调用
-  return 'API 尚未配置，请在 CONFIG 中设置 apiEndpoint 和 apiKey';
+  try {
+    const resp = await fetch(CONFIG.apiEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.model,
+        messages: [
+          { role: 'system', content: cfg.systemPrompt },
+          ...cfg.chatHistory.slice(-10),
+          { role: 'user', content: query }
+        ]
+      })
+    });
+    
+    if (!resp.ok) {
+      const errorData = await resp.json().catch(() => ({}));
+      return `API ERROR ${resp.status}: ${errorData.error?.message || resp.statusText}`;
+    }
+    
+    const data = await resp.json();
+    return data.choices?.[0]?.message?.content || 'ERROR: NO RESPONSE';
+  } catch (e) {
+    return `API ERROR: ${e.message}\n\n请检查:\n1. API Key 是否正确\n2. API 端点是否可访问\n3. 网络连接是否正常`;
+  }
 }
-
 // ===== DEMO RESPONSES =====
 function generateDemoResponse(node, query) {
   const responses = {
