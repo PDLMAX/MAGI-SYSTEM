@@ -45,5 +45,5 @@ A decision-making interface inspired by the **Magi supercomputer system** from *
 🧙 MAGI-SYSTEM 免费开源，仅供个人学习、非商用使用。
 如需 商用部署、团队自用、二次改版、白标私有化使用，
 请联系作者购买商业授权，尊重个人开发成果。
-欢迎+V："pdlmax" 讨论/合作 
+欢迎+微："pdlmax" 讨论/合作 
 项目制作不易，如果觉得项目好用，也欢迎赞助，支持持续更新。
