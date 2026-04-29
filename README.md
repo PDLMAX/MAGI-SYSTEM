@@ -1,4 +1,4 @@
-# ◈ MAGI SYSTEM 三贤者决策系统 【通用版】
+# ◈ MAGI SYSTEM 三贤者决策系统 【通用大模型版】
 
 > **Version 3.0.0** | Single Provider Architecture
 
