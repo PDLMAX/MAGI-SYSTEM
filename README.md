@@ -1,4 +1,4 @@
-# ◈ MAGI SYSTEM 三贤者决策系统
+# ◈ MAGI SYSTEM 三贤者决策系统 【通用版】
 
 > **Version 3.0.0** | Single Provider Architecture
 
@@ -199,16 +199,16 @@ MIT License
 #如何绑定：
 1. 打开index文档： 找到"===== CONFIGURATION ====="配置项目 
 2. 找到对应如：  apiEndpoint: '',  // 配置你的豆包 API 端点   
-              apiKey: '',       // 配置你的豆包 API Key  （个人API key 不轻易对外透露）   
-3. 注意：提供个人的API 需要去大模型网站上自行申请
+              apiKey: '',       // 配置你的豆包 API Key  （个人API key 不轻易对外透露）
+              model:''    // 配置你的“大模型”
+4. 注意：提供个人的API 需要去大模型网站上自行申请
 
-相关教程参考：
-
-🧙 MAGI-SYSTEM 免费开源，仅供个人学习、非商用使用。
+5. 🧙 MAGI-SYSTEM 免费开源，仅供个人学习、非商用使用。
 如需 商用部署、团队自用、二次改版、白标私有化使用，
 请联系作者购买商业授权，尊重个人开发成果。
 部署时候遇到问题也欢迎 +微："pdlmax" 讨论/合作 
-项目制作不易，如果觉得好用，也欢迎赞助，支持更新。
+项目制作不易，如果觉得好用，也欢迎提供更多赞助和技术支持更新。
+
 ---
 
 **Made with ◈ by Peter Pan**  
