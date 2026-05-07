@@ -26,22 +26,14 @@
 ## 🚀 快速开始
 
 ### 1. 配置 API
+<img width="128" height="104" alt="截屏2026-05-07 22 26 53" src="https://github.com/user-attachments/assets/9709df02-e87f-4fb5-9650-20c05e8d24f3" />
+点击ADAMS 容器 （剧情设定 Adams Container）
+<img width="773" height="622" alt="截屏2026-05-07 22 41 43" src="https://github.com/user-attachments/assets/976d55b2-5a19-4ddb-914e-d853c0eef6d9" />
+- 放置【灵魂】 “AI 大模型”
+- 【神经同步】“模型API接口 base_url地址”
+- 【尼布甲尼撒之钥】“API Key”
+先”保存"一下，再点"加载“,成功部署大模型
 
-打开 `MAGI-SYSTEM-index.html`，找到配置区域：
-
-```javascript
-const CONFIG = {
-  apiEndpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-  apiKey: 'YOUR_API_KEY_HERE',  // ⚠️ 替换为你的 API Key
-  model: 'YOUR_MODEL_ID_HERE',  // ⚠️ 替换为你的模型 ID
-  
-  nodes: {
-    casper: { /* ... */ },
-    balthasar: { /* ... */ },
-    melchior: { /* ... */ }
-  }
-};
-```
 
 ### 2. 获取 API Key
 
@@ -50,7 +42,7 @@ const CONFIG = {
 **简要步骤**:
 1. 访问 [火山引擎方舟控制台](https://console.volcengine.com/ark)
 2. 创建 API Key
-3. 创建模型推理接入点（Endpoint）
+3. 创建模型推理接入点（Endpoint） “https://your_AI_Endpoint/chat/completions”(注意：是替换掉/chat/completions 前的内容）
 4. 复制 API Key 和模型 ID 到配置中
 
 ### 3. 运行
