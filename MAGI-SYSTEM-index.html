@@ -136,6 +136,11 @@
     100% { transform: scale(1); }
   }
 
+  @keyframes pulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--orange-glow), 0 0 20px var(--orange-glow); }
+    50% { opacity: 0.8; text-shadow: 0 0 15px var(--orange-glow), 0 0 30px var(--orange-glow); }
+  }
+
   @keyframes dataStream {
     0% { transform: translateY(-100%); opacity: 0; }
     10% { opacity: 1; }
@@ -272,9 +277,51 @@
     box-shadow: 0 0 30px var(--green-glow), inset 0 0 30px rgba(0,255,65,0.1);
   }
 
+  /* ===== THINKING STATE ===== */
   .magi-node.thinking {
     border-color: var(--orange);
     box-shadow: 0 0 30px var(--orange-glow);
+    animation: nodeThinkingPulse 0.6s ease-in-out infinite;
+  }
+
+  @keyframes nodeThinkingPulse {
+    0%, 100% {
+      background: var(--panel-bg);
+      box-shadow: 0 0 20px var(--orange-glow), inset 0 0 15px rgba(255, 102, 0, 0.05);
+    }
+    50% {
+      background: rgba(255, 102, 0, 0.08);
+      box-shadow: 0 0 40px var(--orange-glow), inset 0 0 30px rgba(255, 102, 0, 0.12);
+    }
+  }
+
+  /* ===== VERDICT BACKGROUND COLORS ===== */
+  .magi-node.verdict-bg-approve {
+    background: rgba(0, 255, 65, 0.06);
+    border-color: var(--green);
+    box-shadow: 0 0 20px var(--green-glow), inset 0 0 15px rgba(0, 255, 65, 0.06);
+    animation: none;
+  }
+
+  .magi-node.verdict-bg-reject {
+    background: rgba(255, 51, 51, 0.06);
+    border-color: var(--red);
+    box-shadow: 0 0 20px var(--red-glow), inset 0 0 15px rgba(255, 51, 51, 0.06);
+    animation: none;
+  }
+
+  .magi-node.verdict-bg-analyze {
+    background: rgba(255, 102, 0, 0.05);
+    border-color: var(--orange);
+    box-shadow: 0 0 20px var(--orange-glow), inset 0 0 15px rgba(255, 102, 0, 0.05);
+    animation: none;
+  }
+
+  .magi-node.verdict-bg-idle {
+    background: var(--panel-bg);
+    border-color: var(--green);
+    box-shadow: none;
+    animation: borderPulse 3s infinite;
   }
 
   .node-name {
@@ -307,6 +354,11 @@
   .node-verdict.reject {
     color: var(--red);
     text-shadow: 0 0 10px var(--red-glow), 0 0 20px var(--red-glow);
+  }
+
+  .node-verdict.analyze {
+    color: var(--orange);
+    text-shadow: 0 0 10px var(--orange-glow), 0 0 20px var(--orange-glow);
   }
 
   .node-verdict.pending {
@@ -660,6 +712,16 @@
     font-size: 10px;
     color: var(--text-dim);
     letter-spacing: 2px;
+  }
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer a:hover {
+    color: var(--text-bright);
+    text-decoration: underline;
+  }
     padding: 15px;
     border-top: 1px solid var(--border);
   }
@@ -818,6 +880,188 @@
   .info-item .info-value.red { color: var(--red); }
   .info-item .info-value.orange { color: var(--orange); }
   .info-item .info-value.dim { color: var(--text-dim); }
+
+  /* ===== ADAMS CONTAINER MENU ===== */
+  .adams-container-menu {
+    position: relative;
+    display: inline-block;
+  }
+
+  .adams-menu-btn {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+  }
+
+  .adams-menu-btn:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .adams-dropdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 99999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .adams-dropdown.active {
+    display: flex;
+  }
+
+  .adams-dropdown .adams-form {
+    background: var(--panel-bg);
+    border: 1px solid var(--green);
+    width: 400px;
+    padding: 25px;
+    box-shadow: 0 0 40px var(--green-glow);
+    animation: modalAppear 0.3s ease-out;
+    position: relative;
+  }
+
+  .adams-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .adams-close-btn:hover {
+    background: rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 10px var(--green-glow);
+  }
+
+  @keyframes modalAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .adams-form .form-group {
+    margin-bottom: 15px;
+  }
+
+  .adams-form label {
+    display: block;
+    font-size: 12px;
+    color: var(--green);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px var(--green-glow);
+  }
+
+  .adams-form label .label-hint {
+    color: var(--text-dim);
+    font-size: 10px;
+    text-shadow: none;
+    margin-left: 4px;
+  }
+
+  /* === Load Bar === */
+  .load-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid var(--border);
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  .load-bar.active {
+    display: block;
+  }
+  .load-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green-dim), var(--green), var(--green-dim));
+    box-shadow: 0 0 8px var(--green-glow);
+    transition: width 0.15s linear;
+  }
+  .load-bar-fill.done {
+    background: var(--green);
+    box-shadow: 0 0 12px var(--green-glow);
+  }
+  .load-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-shadow: 0 0 4px var(--green-glow);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .adams-form input {
+    width: 100%;
+    background: rgba(0, 255, 65, 0.03);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 8px 10px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    box-sizing: border-box;
+  }
+
+  .adams-form input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn.small {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .btn.small.red {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .btn.small.red:hover {
+    background: rgba(255, 51, 51, 0.1);
+    box-shadow: 0 0 8px var(--red-glow);
+  }
+
+  .btn.small:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
 </style>
 </head>
 <body>
@@ -856,6 +1100,38 @@
       <span class="header-line" style="margin:0;"><span class="label">PRIORITY :</span><span class="value">AAA</span></span>
       <span class="header-line" style="margin:0;"><span class="label">STATUS :</span><span class="value green" id="sysStatus">ONLINE</span></span>
       <span class="header-line" style="margin:0;"><span class="label">SESSION :</span><span class="value" id="sessionId">—</span></span>
+      <span class="header-line" style="margin:0;">
+        <div class="adams-container-menu">
+          <button class="adams-menu-btn" onclick="toggleAdamsMenu()" title="ADAMS 配置">
+            ADAMS ◈
+          </button>
+          <div class="adams-dropdown" id="adamsDropdown">
+            <div class="adams-form">
+              <button class="adams-close-btn" onclick="toggleAdamsMenu()">×</button>
+              <div class="form-group">
+                <label>同步神经连接 <span class="label-hint">（大模型 API 端点）</span></label>
+                <input type="text" id="apiEndpointInput" placeholder="https://api.example.com/v1/chat/completions">
+                <div class="load-bar"><div class="load-bar-fill" id="bar-endpoint"></div><span class="load-bar-text" id="bar-endpoint-text"></span></div>
+              </div>
+              <div class="form-group">
+                <label>放置灵魂 <span class="label-hint">（模型名称）</span></label>
+                <input type="text" id="modelInput" placeholder="gpt-4, claude-3, etc.">
+                <div class="load-bar"><div class="load-bar-fill" id="bar-model"></div><span class="load-bar-text" id="bar-model-text"></span></div>
+              </div>
+              <div class="form-group">
+                <label>尼布甲尼撒之钥 <span class="label-hint">（API_Key 秘钥）</span></label>
+                <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxx">
+                <div class="load-bar"><div class="load-bar-fill" id="bar-key"></div><span class="load-bar-text" id="bar-key-text"></span></div>
+              </div>
+              <div class="form-actions">
+                <button class="btn small" onclick="saveAdamsConfig()">保存</button>
+                <button class="btn small" onclick="loadAdamsConfig()">加载</button>
+                <button class="btn small red" onclick="resetAdamsConfig()">重置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </span>
     </div>
   </div>
 
@@ -1007,17 +1283,17 @@
 
   <!-- FOOTER -->
   <div class="footer">
-    MAGI SYSTEM v2.6.0 — NERV SUPERCOMPUTER DIVISION — CLASSIFIED
+    <a href="https://github.com/PDLMAX/MAGI-SYSTEM.git" target="_blank" style="color: inherit; text-decoration: none;">MAGI SYSTEM v3.0.0</a> — NERV SUPERCOMPUTER DIVISION — CLASSIFIED
   </div>
 </div>
 
 <script>
 // ===== CONFIGURATION =====
 // 在此处配置你的 API Key 和模型信息
-// ⚠️ 请替换为你自己的火山引擎豆包 API 配置
+// ⚠️ 请替换为你自己的大模型 API 配置
 const CONFIG = {
-  // 统一使用 Doubao API，通过不同的人格设定实现差异化回答
-  apiEndpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',  // 【必填】替换为你的 API 端点
+  // 调用大模型 API，通过不同的人格设定实现差异化回答 [目前可通过前端部署实现]
+  apiEndpoint: 'https://api.example.com/chat/completions',  // 【必填】替换为你的 API 端点
   apiKey: 'YOUR_API_KEY_HERE',  // ⚠️【必填】替换为你的 API Key（示例：ark-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）
   model: 'YOUR_MODEL_ID_HERE',  // ⚠️【必填】替换为你的模型 ID（示例：ep-xxxxxxxxxxxxxx）
   
@@ -1052,6 +1328,16 @@ let isProcessing = false;
 
 // ===== BOOT SEQUENCE =====
 async function bootSequence() {
+  // 启动时自动加载本地存储的配置
+  const savedEndpoint = localStorage.getItem('magi_apiEndpoint');
+  const savedModel = localStorage.getItem('magi_model');
+  const savedKey = localStorage.getItem('magi_apiKey');
+  if (savedEndpoint && savedModel && savedKey) {
+    CONFIG.apiEndpoint = savedEndpoint;
+    CONFIG.model = savedModel;
+    CONFIG.apiKey = savedKey;
+    CONFIG.demoMode = false;
+  }
   const bootLines = [
     'INITIALIZING MAGI SUPERCOMPUTER...',
     'LOADING CASPER-3 MODULE ........... OK',
@@ -1165,19 +1451,35 @@ function closeSingleChat() {
 async function submitQuery() {
   const input = document.getElementById('queryInput');
   const query = input.value.trim();
-  if (!query || isProcessing) return;
+  if (!query || isProcessing) {
+    if (isProcessing) {
+      alert('正在处理中，请稍候...');
+    }
+    return;
+  }
 
   isProcessing = true;
   input.value = '';
 
-  if (currentMode === 'all') {
-    await runAllNodes(query);
-  } else {
-    await runSingleNode(currentSingleNode, query);
+  try {
+    if (currentMode === 'all') {
+      await runAllNodes(query);
+    } else {
+      await runSingleNode(currentSingleNode, query);
+    }
+  } catch (error) {
+    console.error('处理出错:', error);
+    document.getElementById('sysStatus').textContent = 'ERROR';
+    document.getElementById('sysStatus').className = 'value red';
+  } finally {
+    isProcessing = false;
+    // 单模型模式下保持聚焦在 chatInput
+    if (currentMode === 'single') {
+      document.getElementById('chatInput').focus();
+    } else {
+      input.focus();
+    }
   }
-
-  isProcessing = false;
-  input.focus();
 }
 
 // ===== RUN ALL NODES (VOTING MODE) =====
@@ -1192,18 +1494,24 @@ async function runAllNodes(query) {
   document.getElementById('sysStatus').textContent = 'PROCESSING';
   document.getElementById('sysStatus').className = 'value orange';
 
+  // 隐藏投票面板，重新开始
+  document.getElementById('votingResult').classList.remove('visible');
+  document.getElementById('resultVerdict').textContent = '—';
+  document.getElementById('voteCount').textContent = '—';
+
   // Show all panels
   nodes.forEach(node => {
     document.getElementById(`panel-${node}`).classList.add('visible');
     document.getElementById(`response-${node}`).innerHTML = '<span class="cursor-blink"></span>';
-    document.getElementById(`node-${node}`).classList.add('thinking');
+    const nodeBox = document.getElementById(`node-${node}`);
+    // 移除旧 verdict 背景，启动思考闪烁
+    nodeBox.className = nodeBox.className.replace(/\s*verdict-bg-\S+/g, '');
+    nodeBox.classList.add('thinking');
     document.getElementById(`verdict-${node}`).textContent = '—';
     document.getElementById(`verdict-${node}`).className = 'node-verdict thinking-state';
     document.getElementById(`status-${node}`).textContent = 'COMPUTING';
     document.getElementById(`dot-${node}`).classList.add('orange');
   });
-
-  document.getElementById('votingResult').classList.remove('visible');
 
   // Run all three in parallel
   const promises = nodes.map(async node => {
@@ -1222,44 +1530,136 @@ async function runAllNodes(query) {
     // Typewriter effect
     await typewriter(`response-${node}`, response);
 
-    // Verdict (random for demo, based on response for real)
-    const approve = Math.random() > 0.3;
+    // ===== MAGI 三贤者投票判定机制 =====
+    // 三贤者各自独立判断，根据问题类型给出不同判定
     const verdictEl = document.getElementById(`verdict-${node}`);
-    verdictEl.textContent = approve ? '承認' : '否定';
-    verdictEl.className = approve ? 'node-verdict approve' : 'node-verdict reject';
+    let approve;
+    
+    // 第一层：明确的决策/是否类问题 → 承認 或 否定
+    const decisionKeywords = ['是否', '要不要', '选哪个', '决策', '决定', '同意', '批准', '通过', '拒绝', '执行', '实施', '做不做', '办不办', '去不去', '来不来', '买不买', '可不可以', '能不能', '是否同意', '是否执行', '是否通过'];
+    const isDecisionQuery = decisionKeywords.some(kw => query.toLowerCase().includes(kw));
+    
+    // 第二层：纯分析/情报收集类问题 → 情報
+    const infoKeywords = ['分析一下', '帮我分析', '说明一下', '介绍一下', '列出', '查一下', '收集', '整理', '汇总', '有哪些', '是什么', '什么情况'];
+    const isInfoQuery = infoKeywords.some(kw => query.toLowerCase().includes(kw));
+    
+    const nodeBox = document.getElementById(`node-${node}`);
+
+    if (isInfoQuery) {
+      // 纯信息收集类问题，统一显示"情報"
+      verdictEl.textContent = '情報';
+      verdictEl.className = 'node-verdict analyze';
+      verdictEl.style.animation = 'pulse 1.5s ease-in-out infinite';
+      document.getElementById(`status-${node}`).textContent = 'INFORMATION';
+      nodeBox.className = nodeBox.className.replace(/verdict-bg-\S+/g, '') + ' verdict-bg-analyze';
+    } else if (isDecisionQuery) {
+      // 决策类问题：三贤者各自给出判斷（70% 承認 / 30% 否定）
+      approve = Math.random() > 0.3;
+      verdictEl.textContent = approve ? '承認' : '否定';
+      verdictEl.className = approve ? 'node-verdict approve' : 'node-verdict reject';
+      verdictEl.style.animation = approve ? 'voteApprove 0.5s ease' : 'voteReject 0.5s ease';
+      document.getElementById(`status-${node}`).textContent = approve ? 'APPROVED' : 'DENIED';
+      nodeBox.className = nodeBox.className.replace(/verdict-bg-\S+/g, '') + (approve ? ' verdict-bg-approve' : ' verdict-bg-reject');
+    } else {
+      // 第三层：一般问题（分析/推理/探讨）→ 三贤者混合判定
+      // 每个贤者根据自身"性格"给出判定，产生分歧感
+      const nodeWeights = {
+        'casper': { approve: 0.5, reject: 0.2, info: 0.3 },      // 理性分析：相对平衡
+        'balthasar': { approve: 0.3, reject: 0.4, info: 0.3 },   // 逻辑推演：更挑剔
+        'melchior': { approve: 0.6, reject: 0.1, info: 0.3 }     // 深度计算：更乐观
+      };
+      
+      const weights = nodeWeights[node] || { approve: 0.5, reject: 0.2, info: 0.3 };
+      const rand = Math.random();
+      
+      if (rand < weights.approve) {
+        verdictEl.textContent = '承認';
+        verdictEl.className = 'node-verdict approve';
+        verdictEl.style.animation = 'voteApprove 0.5s ease';
+        document.getElementById(`status-${node}`).textContent = 'APPROVED';
+        nodeBox.className = nodeBox.className.replace(/verdict-bg-\S+/g, '') + ' verdict-bg-approve';
+        approve = true;
+      } else if (rand < weights.approve + weights.reject) {
+        verdictEl.textContent = '否定';
+        verdictEl.className = 'node-verdict reject';
+        verdictEl.style.animation = 'voteReject 0.5s ease';
+        document.getElementById(`status-${node}`).textContent = 'DENIED';
+        nodeBox.className = nodeBox.className.replace(/verdict-bg-\S+/g, '') + ' verdict-bg-reject';
+        approve = false;
+      } else {
+        verdictEl.textContent = '情報';
+        verdictEl.className = 'node-verdict analyze';
+        verdictEl.style.animation = 'pulse 1.5s ease-in-out';
+        document.getElementById(`status-${node}`).textContent = 'INFORMATION';
+        nodeBox.className = nodeBox.className.replace(/verdict-bg-\S+/g, '') + ' verdict-bg-analyze';
+        approve = false;
+      }
+    }
 
     document.getElementById(`node-${node}`).classList.remove('thinking');
     document.getElementById(`status-${node}`).textContent = 'COMPLETE';
     document.getElementById(`dot-${node}`).classList.remove('orange');
 
     // Add vote animation
-    verdictEl.style.animation = approve ? 'voteApprove 0.5s ease' : 'voteReject 0.5s ease';
+    if (isDecisionQuery || !isInfoQuery) {
+      verdictEl.style.animation = approve ? 'voteApprove 0.5s ease' : 'voteReject 0.5s ease';
+    } else {
+      verdictEl.style.animation = 'pulse 1.5s ease-in-out infinite';
+    }
     setTimeout(() => { verdictEl.style.animation = ''; }, 500);
   });
 
   await Promise.all(promises);
 
-  // Calculate final result
-  const approveCount = Object.values(results).length > 0
-    ? nodes.filter(n => document.getElementById(`verdict-${n}`).textContent === '承認').length
-    : 0;
+  // ===== 三贤者最终决议 =====
+  const approveCount = nodes.filter(n => document.getElementById(`verdict-${n}`).textContent === '承認').length;
+  const rejectCount = nodes.filter(n => document.getElementById(`verdict-${n}`).textContent === '否定').length;
+  const infoCount = nodes.filter(n => document.getElementById(`verdict-${n}`).textContent === '情報').length;
 
   const resultVerdict = document.getElementById('resultVerdict');
   const voteCount = document.getElementById('voteCount');
 
-  if (approveCount >= 2) {
+  // 情况1： unanimous 情報 → 情報分析
+  if (infoCount >= 3) {
+    resultVerdict.textContent = '情報 ANALYSIS';
+    resultVerdict.className = 'result-verdict split';
+    resultVerdict.style.color = 'var(--orange)';
+    resultVerdict.style.textShadow = '0 0 10px var(--orange-glow), 0 0 20px var(--orange-glow)';
+    document.getElementById('deliberationResult').textContent = 'ANALYSIS';
+    document.getElementById('deliberationResult').className = 'value';
+    document.getElementById('deliberationResult').style.color = 'var(--orange)';
+    voteCount.textContent = ' unanimous 情報 · 三贤者一致研判';
+  } else if (infoCount >= 2 && approveCount + rejectCount <= 1) {
+    // 情况2：多数情報 → 情報分析
+    resultVerdict.textContent = '情報 ANALYSIS';
+    resultVerdict.className = 'result-verdict split';
+    resultVerdict.style.color = 'var(--orange)';
+    resultVerdict.style.textShadow = '0 0 10px var(--orange-glow), 0 0 20px var(--orange-glow)';
+    document.getElementById('deliberationResult').textContent = 'ANALYSIS';
+    document.getElementById('deliberationResult').className = 'value';
+    document.getElementById('deliberationResult').style.color = 'var(--orange)';
+    voteCount.textContent = `${infoCount}情報 ${approveCount}承認 ${rejectCount}否定 · 情報分析`;
+  } else if (approveCount >= 2) {
+    // 情况3：多数承認 → 承認通过
     resultVerdict.textContent = '承認 APPROVED';
     resultVerdict.className = 'result-verdict approved';
+    resultVerdict.style.color = '';
+    resultVerdict.style.textShadow = '';
     document.getElementById('deliberationResult').textContent = 'APPROVED';
     document.getElementById('deliberationResult').className = 'value';
+    document.getElementById('deliberationResult').style.color = '';
+    voteCount.textContent = `${approveCount}承認 ${rejectCount}否定 ${infoCount}情報 · 多数赞成`;
   } else {
+    // 情况4：否決（包括混合僵局）
     resultVerdict.textContent = '否定 REJECTED';
     resultVerdict.className = 'result-verdict rejected';
+    resultVerdict.style.color = '';
+    resultVerdict.style.textShadow = '';
     document.getElementById('deliberationResult').textContent = 'REJECTED';
     document.getElementById('deliberationResult').className = 'value red';
+    document.getElementById('deliberationResult').style.color = '';
+    voteCount.textContent = `${approveCount}承認 ${rejectCount}否定 ${infoCount}情報 · 未获多数`;
   }
-
-  voteCount.textContent = `${approveCount} / 3 赞成`;
   document.getElementById('votingResult').classList.add('visible');
 
   document.getElementById('sysStatus').textContent = 'ONLINE';
@@ -1274,6 +1674,9 @@ async function runSingleNode(node, query) {
 
   chatSection.classList.add('visible');
 
+  // Use unique ID for each response to avoid clashes
+  const responseId = 'chat-response-' + Date.now();
+
   // Add user message
   const userMsg = document.createElement('div');
   userMsg.className = 'chat-msg user';
@@ -1283,10 +1686,10 @@ async function runSingleNode(node, query) {
   // Add AI message placeholder
   const aiMsg = document.createElement('div');
   aiMsg.className = 'chat-msg';
-  aiMsg.innerHTML = `<div class="msg-sender">${cfg.name}</div><div class="msg-text" id="chat-response"></div>`;
+  aiMsg.innerHTML = `<div class="msg-sender">${cfg.name}</div><div class="msg-text" id="${responseId}"></div>`;
   chatMessages.appendChild(aiMsg);
 
-  const responseEl = document.getElementById('chat-response');
+  const responseEl = document.getElementById(responseId);
   responseEl.innerHTML = '<span class="cursor-blink">▌</span>';
 
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1294,26 +1697,45 @@ async function runSingleNode(node, query) {
   await delay(800 + Math.random() * 1500);
 
   let response;
-  if (CONFIG.demoMode) {
-    response = generateDemoResponse(node, query);
-  } else {
-    response = await callAPI(node, query);
+  try {
+    if (CONFIG.demoMode) {
+      response = generateDemoResponse(node, query);
+    } else {
+      response = await callAPI(node, query);
+    }
+  } catch (e) {
+    response = `⚠️ 处理出错: ${e.message || e}`;
+    console.error('runSingleNode error:', e);
   }
 
   cfg.chatHistory.push({ role: 'user', content: query });
   cfg.chatHistory.push({ role: 'assistant', content: response });
 
-  await typewriter('chat-response', response);
+  await typewriter(responseId, response);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function sendChat() {
+async function sendChat() {
+  if (isProcessing) {
+    alert('正在处理中，请稍候...');
+    return;
+  }
+
   const input = document.getElementById('chatInput');
   const query = input.value.trim();
   if (!query) return;
 
+  isProcessing = true;
   input.value = '';
-  runSingleNode(currentSingleNode, query);
+
+  try {
+    await runSingleNode(currentSingleNode, query);
+  } catch (error) {
+    console.error('sendChat error:', error);
+  } finally {
+    isProcessing = false;
+    input.focus();
+  }
 }
 
 // ===== API CALL (placeholder) =====
@@ -1403,15 +1825,27 @@ function clearAll() {
     document.getElementById(`response-${node}`).textContent = '';
     document.getElementById(`verdict-${node}`).textContent = '—';
     document.getElementById(`verdict-${node}`).className = 'node-verdict pending';
-    document.getElementById(`node-${node}`).classList.remove('thinking');
+    document.getElementById(`verdict-${node}`).style.animation = '';
+    const nodeBox = document.getElementById(`node-${node}`);
+    nodeBox.classList.remove('thinking');
+    // 移除 verdict 背景配色类
+    nodeBox.className = nodeBox.className.replace(/\s*verdict-bg-\S+/g, '');
+    nodeBox.classList.add('verdict-bg-idle');
     document.getElementById(`status-${node}`).textContent = 'STANDBY';
     document.getElementById(`dot-${node}`).classList.remove('orange');
   });
 
+  // 重置投票结果面板内容（保留面板显示）
+  document.getElementById('resultVerdict').textContent = '—';
+  document.getElementById('resultVerdict').className = 'result-verdict';
+  document.getElementById('resultVerdict').style.color = '';
+  document.getElementById('resultVerdict').style.textShadow = '';
+  document.getElementById('voteCount').textContent = '—';
   document.getElementById('votingResult').classList.remove('visible');
   document.getElementById('motionText').textContent = 'STANDBY';
   document.getElementById('deliberationResult').textContent = '—';
   document.getElementById('deliberationResult').className = 'value';
+  document.getElementById('deliberationResult').style.color = '';
   document.getElementById('sysStatus').textContent = 'ONLINE';
   document.getElementById('sysStatus').className = 'value green';
 
@@ -1423,6 +1857,9 @@ function clearAll() {
   document.getElementById('codeValue').textContent = code;
 
   document.getElementById('queryInput').focus();
+  
+  // 重置处理状态，允许再次提问
+  isProcessing = false;
 }
 
 // ===== UTILITY =====
@@ -1430,6 +1867,118 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+
+// ===== ADAMS CONTAINER FUNCTIONS =====
+function toggleAdamsMenu() {
+  const dropdown = document.getElementById('adamsDropdown');
+  dropdown.classList.toggle('active');
+  
+  // 每次打开菜单时，加载已保存的配置到表单
+  if (dropdown.classList.contains('active')) {
+    loadAdamsConfigToForm();
+  }
+}
+
+// 仅加载配置到表单（不更新 CONFIG）
+function loadAdamsConfigToForm() {
+  const savedApiEndpoint = localStorage.getItem('magi_apiEndpoint');
+  const savedModel = localStorage.getItem('magi_model');
+  const savedApiKey = localStorage.getItem('magi_apiKey');
+  
+  if (savedApiEndpoint) document.getElementById('apiEndpointInput').value = savedApiEndpoint;
+  if (savedModel) document.getElementById('modelInput').value = savedModel;
+  if (savedApiKey) document.getElementById('apiKeyInput').value = savedApiKey;
+}
+
+function saveAdamsConfig() {
+  const apiEndpoint = document.getElementById('apiEndpointInput').value.trim();
+  const model = document.getElementById('modelInput').value.trim();
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!apiEndpoint || !model || !apiKey) {
+    alert('请填写所有配置项！');
+    return;
+  }
+  localStorage.setItem('magi_apiEndpoint', apiEndpoint);
+  localStorage.setItem('magi_model', model);
+  localStorage.setItem('magi_apiKey', apiKey);
+  CONFIG.apiEndpoint = apiEndpoint;
+  CONFIG.model = model;
+  CONFIG.apiKey = apiKey;
+  alert('配置已保存并生效！');
+}
+
+function loadAdamsConfig() {
+  const savedApiEndpoint = localStorage.getItem('magi_apiEndpoint');
+  const savedModel = localStorage.getItem('magi_model');
+  const savedApiKey = localStorage.getItem('magi_apiKey');
+  
+  if (!savedApiEndpoint && !savedModel && !savedApiKey) {
+    alert('本地没有保存的配置。');
+    return;
+  }
+
+  // 三个进度条
+  const bars = [
+    { bar: 'bar-endpoint', text: 'bar-endpoint-text', label: '同步神经连接' },
+    { bar: 'bar-model', text: 'bar-model-text', label: '放置灵魂' },
+    { bar: 'bar-key', text: 'bar-key-text', label: '尼布甲尼撒之钥' },
+  ];
+
+  // 显示所有进度条
+  bars.forEach(b => {
+    const barEl = document.getElementById(b.bar);
+    barEl.parentElement.classList.add('active');
+    barEl.style.width = '0%';
+    barEl.classList.remove('done');
+    document.getElementById(b.text).textContent = '';
+  });
+
+  // 依次加载三个进度条
+  (async () => {
+    for (const b of bars) {
+      const barEl = document.getElementById(b.bar);
+      const textEl = document.getElementById(b.text);
+      
+      // 0% → 100%
+      for (let p = 0; p <= 100; p++) {
+        barEl.style.width = p + '%';
+        if (p < 100) {
+          textEl.textContent = p + '%';
+        }
+        await delay(10 + Math.random() * 15);
+      }
+      
+      barEl.classList.add('done');
+      textEl.textContent = '加载成功';
+      await delay(200);
+    }
+
+    // 填充表单数据
+    if (savedApiEndpoint) document.getElementById('apiEndpointInput').value = savedApiEndpoint;
+    if (savedModel) document.getElementById('modelInput').value = savedModel;
+    if (savedApiKey) document.getElementById('apiKeyInput').value = savedApiKey;
+    
+    // 更新 CONFIG
+    if (savedApiEndpoint && savedModel && savedApiKey) {
+      CONFIG.apiEndpoint = savedApiEndpoint;
+      CONFIG.model = savedModel;
+      CONFIG.apiKey = savedApiKey;
+      CONFIG.demoMode = false;
+    }
+  })();
+}
+
+function resetAdamsConfig() {
+  if (confirm('确定要重置所有配置吗？')) {
+    document.getElementById('apiEndpointInput').value = '';
+    document.getElementById('modelInput').value = '';
+    document.getElementById('apiKeyInput').value = '';
+    localStorage.removeItem('magi_apiEndpoint');
+    localStorage.removeItem('magi_model');
+    localStorage.removeItem('magi_apiKey');
+  }
 }
 
 // ===== KEYBOARD SHORTCUTS =====
